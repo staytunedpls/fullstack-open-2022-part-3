@@ -25,3 +25,4 @@ yarn-error.log*
 # test env
 test_app
 test_node
+requests
