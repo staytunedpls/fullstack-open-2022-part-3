@@ -3,6 +3,7 @@ const morgan = require("morgan");
 const app = express();
 
 app.use(express.json());
+app.use(express.static("build"))
 
 morgan.token("postInfo", (request, response) => {
   if (request.method === "POST") {
@@ -67,7 +68,6 @@ const generateNewId = () => {
 
 app.post("/api/persons", (request, response) => {
   const request_body = request.body;
-  const nobody = !request_body.name;
   if (!request_body.name || !request_body.number) {
     return response.status(400).json({ error: "no name or number in request" });
   } else if (persons.map((p) => p.name).includes(request_body.name)) {
@@ -92,7 +92,7 @@ app.get("/info", (request, response) => {
   response.send(`${length_info}\n${date_info}`);
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
