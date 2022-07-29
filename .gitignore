@@ -2,14 +2,6 @@
 
 # dependencies
 node_modules
-.pnp
-.pnp.js
-
-# testing
-coverage
-
-# production
-build
 
 # misc
 .DS_Store
@@ -23,6 +15,4 @@ yarn-debug.log*
 yarn-error.log*
 
 # test env
-test_app
-test_node
 requests
