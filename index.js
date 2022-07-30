@@ -66,27 +66,18 @@ app.delete("/api/persons/:id", (request, response) => {
   response.status(204).end();
 });
 
-const generateNewId = () => {
-  const maxId = 10000;
-  return Math.floor(Math.random() * maxId) + 1;
-};
-
 app.post("/api/persons", (request, response) => {
   const request_body = request.body;
   if (!request_body.name || !request_body.number) {
     return response.status(400).json({ error: "no name or number in request" });
-  } else if (persons.map((p) => p.name).includes(request_body.name)) {
-    return response
-      .status(409)
-      .json({ error: "name already in the phonebook" });
   } else {
-    const person = {
-      id: generateNewId(),
+    const newPerson = new Person({
       name: request_body.name,
       number: request_body.number,
-    };
-    persons = persons.concat(person);
-    return response.json(person);
+    });
+    newPerson.save().then((savedPerson) => {
+      response.json(savedPerson);
+    });
   }
 });
 
