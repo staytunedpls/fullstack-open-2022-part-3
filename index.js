@@ -61,9 +61,15 @@ app.get("/api/persons/:id", (request, response) => {
 });
 
 app.delete("/api/persons/:id", (request, response) => {
-  const requestedId = Number(request.params.id);
-  persons = persons.filter((p) => p.id !== requestedId);
-  response.status(204).end();
+  Person.findByIdAndRemove(request.params.id)
+    .then((result) => {
+      response.status(204).end();
+    })
+    .catch((error) => {
+      console.log(request.params.id)
+      console.log(error.message);
+      response.status(400).end();
+    });
 });
 
 app.post("/api/persons", (request, response) => {
