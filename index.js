@@ -26,15 +26,12 @@ app.get("/api/persons", (request, response) => {
   });
 });
 
-app.get("/api/persons/:id", (request, response) => {
-  const requestedId = Number(request.params.id);
-  const person = persons.find((p) => p.id === requestedId);
-
-  if (person) {
-    response.json(person);
-  } else {
-    response.status(404).end();
-  }
+app.get("/api/persons/:id", (request, response, next) => {
+  Person.findById(request.params.id)
+    .then((person) => {
+      response.json(person);
+    })
+    .catch((error) => next(error));
 });
 
 app.delete("/api/persons/:id", (request, response, next) => {
@@ -78,10 +75,11 @@ app.put("/api/persons/:id", (request, response, next) => {
 });
 
 app.get("/info", (request, response) => {
-  const date = new Date();
-  const length_info = `<p>Phonebook has info for ${persons.length} people</p>`;
-  const date_info = `<p>${date}</p>`;
-  response.send(`${length_info}\n${date_info}`);
+  Person.countDocuments({}).then((count) => {
+    const length_info = `<p>Phonebook has info for ${count} people</p>`;
+    const date_info = `<p>${new Date()}</p>`;
+    response.send(`${length_info}\n${date_info}`);
+  });
 });
 
 const errorHandler = (error, request, response, next) => {
