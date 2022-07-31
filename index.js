@@ -60,6 +60,23 @@ app.post("/api/persons", (request, response) => {
   }
 });
 
+app.put("/api/persons/:id", (request, response, next) => {
+  const request_body = request.body;
+  if (!request_body.name || !request_body.number) {
+    return response.status(400).json({ error: "no name or number in request" });
+  } else {
+    Person.findOneAndUpdate(
+      { name: request_body.name },
+      { $set: { number: request_body.number } },
+      { new: true }
+    )
+      .then((updatedPerson) => {
+        response.json(updatedPerson);
+      })
+      .catch((error) => next(error));
+  }
+});
+
 app.get("/info", (request, response) => {
   const date = new Date();
   const length_info = `<p>Phonebook has info for ${persons.length} people</p>`;
