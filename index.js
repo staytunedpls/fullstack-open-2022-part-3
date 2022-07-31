@@ -20,29 +20,6 @@ app.use(
 
 const Person = require("./models/person");
 
-let persons = [
-  {
-    id: 1,
-    name: "Arto Hellas",
-    number: "040-123456",
-  },
-  {
-    id: 2,
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
-  },
-  {
-    id: 3,
-    name: "Dan Abramov",
-    number: "12-43-234345",
-  },
-  {
-    id: 4,
-    name: "Mary Poppendieck",
-    number: "39-23-6423122",
-  },
-];
-
 app.get("/api/persons", (request, response) => {
   Person.find({}).then((persons) => {
     response.json(persons);
@@ -60,16 +37,12 @@ app.get("/api/persons/:id", (request, response) => {
   }
 });
 
-app.delete("/api/persons/:id", (request, response) => {
+app.delete("/api/persons/:id", (request, response, next) => {
   Person.findByIdAndRemove(request.params.id)
     .then((result) => {
       response.status(204).end();
     })
-    .catch((error) => {
-      console.log(request.params.id)
-      console.log(error.message);
-      response.status(400).end();
-    });
+    .catch((error) => next(error));
 });
 
 app.post("/api/persons", (request, response) => {
@@ -93,6 +66,16 @@ app.get("/info", (request, response) => {
   const date_info = `<p>${date}</p>`;
   response.send(`${length_info}\n${date_info}`);
 });
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error);
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "id has wrong format" });
+  }
+  next(error);
+};
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
