@@ -42,7 +42,7 @@ app.delete("/api/persons/:id", (request, response, next) => {
     .catch((error) => next(error));
 });
 
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response, next) => {
   const request_body = request.body;
   if (!request_body.name || !request_body.number) {
     return response.status(400).json({ error: "no name or number in request" });
@@ -51,9 +51,12 @@ app.post("/api/persons", (request, response) => {
       name: request_body.name,
       number: request_body.number,
     });
-    newPerson.save().then((savedPerson) => {
-      response.json(savedPerson);
-    });
+    newPerson
+      .save()
+      .then((savedPerson) => {
+        response.json(savedPerson);
+      })
+      .catch((error) => next(error));
   }
 });
 
@@ -64,8 +67,10 @@ app.put("/api/persons/:id", (request, response, next) => {
   } else {
     Person.findOneAndUpdate(
       { name: request_body.name },
-      { $set: { number: request_body.number } },
-      { new: true }
+      // setting name as well so that validator tests name as well
+      // (if omitted, only number is checked)
+      { $set: { name: request_body.name, number: request_body.number } },
+      { new: true, runValidators: true }
     )
       .then((updatedPerson) => {
         response.json(updatedPerson);
@@ -86,6 +91,8 @@ const errorHandler = (error, request, response, next) => {
   console.error(error);
   if (error.name === "CastError") {
     return response.status(400).send({ error: "id has wrong format" });
+  } else if (error.name === "ValidationError") {
+    return response.status(400).send({ error: error.message });
   }
   next(error);
 };
